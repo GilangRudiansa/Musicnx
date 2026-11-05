@@ -1,0 +1,40 @@
+
+name: Build OPPO Music NRO
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          dkp-pacman -Sy --noconfirm
+          dkp-pacman -S --noconfirm switch-sdl2 switch-sdl2_mixer switch-sdl2_ttf
+
+      - name: Extract source
+        run: |
+          mkdir extracted
+          unzip -q oppo_music_switch_source.zip -d extracted
+          ls -R extracted
+
+      - name: Build NRO
+        run: |
+          cd extracted/oppo_music_switch
+          make
+
+      - name: Upload NRO
+        uses: actions/upload-artifact@v4
+        with:
+          name: OPPO-Music-NRO
+          path: extracted/oppo_music_switch/oppomusic.nro
+          
